@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 
 abstract class BaseActivity : ComponentActivity() {
-    abstract val window: Any
     private var doubleBackToExitPressedOnce = false
     private var backPressedTimestamp = 0L
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
@@ -35,4 +34,13 @@ abstract class BaseActivity : ComponentActivity() {
         }
     }
 
+    protected fun setSoftInputMode(isType: String = "NOTHING") {
+        window.setSoftInputMode(
+            when (isType) {
+                "PAN" -> WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
+                "RESIZE" -> WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                else -> WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+            }
+        )
+    }
 }
