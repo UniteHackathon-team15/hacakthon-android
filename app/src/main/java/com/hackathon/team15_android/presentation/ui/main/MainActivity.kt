@@ -1,6 +1,8 @@
 package com.hackathon.team15_android.presentation.ui.main
 
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -19,30 +22,22 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hackathon.team15_android.R
-import com.hackathon.team15_android.presentation.base.BaseActivity
 import com.hackathon.team15_android.presentation.ui.main.item.NavigationItem
 import com.hackathon.team15_android.presentation.ui.main.screen.LibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.PublicationScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.StoryScreen
-import com.hackathon.team15_android.presentation.ui.theme.Team15_androidTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Team15_androidTheme {
-                MainScreen()
-            }
+            MainScreen()
         }
-        init()
-    }
-
-    override fun init() {
-
     }
 
     @Composable
@@ -56,9 +51,10 @@ class MainActivity : BaseActivity() {
             backgroundColor = colorResource(id = R.color.white),
             contentColor = Color.Black
         ) {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
             items.forEach { item ->
                 BottomNavigationItem(
-                    onClick = { /*TODO*/ },
                     icon = {
                         Icon(
                             painterResource(id = item.icon),
@@ -68,8 +64,21 @@ class MainActivity : BaseActivity() {
                     label = { Text(text = item.title) },
                     selectedContentColor = Color.Black,
                     unselectedContentColor = Color.Gray.copy(0.4f),
-                    selected = false,
-                )
+                    alwaysShowLabel = true,
+                    selected = currentRoute == item.route,
+                    onClick = {
+                        navController.navigate(item.route) {
+                            navController.graph.startDestinationRoute?.let { route ->
+                                popUpTo(route) {
+                                    saveState = true
+                                }
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+
+                    )
             }
         }
     }
@@ -89,6 +98,7 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     fun MainScreen() {
