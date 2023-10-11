@@ -23,6 +23,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            getApiKey("BASE_URL")
+        )
     }
 
     buildTypes {
@@ -65,6 +71,7 @@ dependencies {
     implementation(Dependency.Compose.COMPOSE_MATERIAL3)
     implementation(Dependency.Compose.COMPOSE_PREVIEW)
     testImplementation(Dependency.Test.JUNIT)
+    implementation(Dependency.Compose.COMPOSE_NAVIGATION)
     androidTestImplementation(Dependency.Test.ANDROID_JUNIT)
     androidTestImplementation(Dependency.Test.ESPRESSO)
     androidTestImplementation(Dependency.Test.COMPOSE_JUNIT)

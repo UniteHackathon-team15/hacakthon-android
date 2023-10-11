@@ -14,6 +14,7 @@ object Dependency {
     }
 
     object Compose {
+        const val COMPOSE_NAVIGATION = "androidx.navigation:navigation-compose:${Versions.COMPOSE_NAVIGATION}"
         const val ACTIVITY_COMPOSE =
             "androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}"
         const val COMPOSE = "androidx.compose.ui:ui:${Versions.COMPOSE}"
