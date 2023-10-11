@@ -22,7 +22,6 @@ object Versions {
 
     const val RETROFIT = "2.9.0"
     const val OKHTTP = "4.11.0"
-    const val GAUTH = "1.1.2"
 
     const val PREFERENCES = "1.0.0"
 

@@ -49,9 +49,6 @@ object Dependency {
         const val COIL = "io.coil-kt:coil-compose:${Versions.COIL}"
     }
 
-    object Msg {
-        const val GAUTH = "com.github.GSM-MSG:GAuth-Signin-Android:v${Versions.GAUTH}"
-    }
 
     object Test {
         const val JUNIT = "junit:junit:${Versions.JUNIT}"
