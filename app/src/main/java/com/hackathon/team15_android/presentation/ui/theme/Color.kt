@@ -1,4 +1,4 @@
-package com.hackathon.team15_android.ui.theme
+package com.hackathon.team15_android.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

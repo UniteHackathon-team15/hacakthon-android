@@ -1,4 +1,4 @@
-package com.hackathon.team15_android.ui.theme
+package com.hackathon.team15_android.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
