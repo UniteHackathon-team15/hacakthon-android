@@ -62,10 +62,14 @@ import com.hackathon.team15_android.R
 import com.hackathon.team15_android.presentation.ui.main.data.Test
 import com.hackathon.team15_android.presentation.ui.main.data.TestDataProvider
 import com.hackathon.team15_android.presentation.ui.main.item.NavItem
+import com.hackathon.team15_android.presentation.viewmodel.PostListViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun LibraryScreen(navController: NavController) {
+fun LibraryScreen(
+    navController: NavController,
+    postListViewModel: PostListViewModel,
+) {
     var selectedItem by remember { mutableStateOf<Test?>(null) }
     val svgImage: Painter = painterResource(R.drawable.ic_library)
     Column(

@@ -32,6 +32,7 @@ import com.hackathon.team15_android.presentation.ui.main.screen.DetailLibraryScr
 import com.hackathon.team15_android.presentation.ui.main.screen.LibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.PublicationScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.StoryScreen
+import com.hackathon.team15_android.presentation.viewmodel.PostListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -91,7 +92,7 @@ class MainActivity : ComponentActivity() {
     fun Navigation(navController: NavHostController) {
         NavHost(navController, startDestination = NavItem.Library.route) {
             composable(NavItem.Library.route) {
-                LibraryScreen(navController)
+                LibraryScreen(navController, PostListViewModel())
             }
             composable(NavItem.Story.route) {
                 StoryScreen()
