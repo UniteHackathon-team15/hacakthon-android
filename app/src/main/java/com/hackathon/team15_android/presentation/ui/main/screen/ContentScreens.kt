@@ -21,13 +21,17 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,12 +44,14 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -245,19 +251,68 @@ fun StoryScreen() {
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    DetailLibraryScreen(navController = rememberNavController())
+    PublicationScreen()
 }
 
 
 @Composable
 fun PublicationScreen() {
+    var text by remember {
+        mutableStateOf(TextFieldValue(""))
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.white))
-            .wrapContentSize(Alignment.Center)
     ) {
+        Text(
+            text = "이야기 생성하기",
+            fontSize = 20.sp,
+            fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+            modifier = Modifier
+                .padding(start = 18.dp, top = 23.dp)
+        )
+        Row(
+            modifier = Modifier
+                .padding(start = 16.dp, top = 84.dp, bottom = 486.dp, end = 16.dp)
+                .height(height = 178.dp)
+                .fillMaxWidth()
+                .background(colorResource(id = R.color.gray), shape = RoundedCornerShape(16.dp)),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_add_local_image),
+                contentDescription = "Add Local Image Button",
+                modifier = Modifier
+                    .clickable {
 
+                    }
+                    .padding(top = 59.dp, bottom = 59.dp)
+                    .height(60.dp)
+                    .width(60.dp)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.ic_separator),
+                contentDescription = "Add Image Button Separator",
+                modifier = Modifier
+                    .padding(start = 35.dp, top = 44.dp, bottom = 44.dp)
+                    .height(100.dp)
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_add_ai_image),
+                contentDescription = "Add AI Image Button Separator",
+                modifier = Modifier
+                    .padding(top = 59.dp, start = 25.dp)
+            )
+
+        }
+        Column(
+
+        ) {
+
+        }
     }
 }
 
@@ -311,31 +366,27 @@ fun DetailLibraryScreen(navController: NavController) {
             )
 
         }
-        Box(
-            contentAlignment = Alignment.BottomCenter,
-            modifier = Modifier
-                .padding(start = 44.dp, bottom = 16.dp)
-        ) {
-            Button(
-                onClick = {
-                    navController.navigate(NavItem.Story.route)
-                },
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
 
-                modifier = Modifier
-                    .width(324.dp)
-                    .height(45.dp)
-                    .scale(1f)
-            ) {
-                Text(
-                    text = "이야기 체험하기",
-                    color = Color.White,
-                    fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                    fontSize = 18.sp,
-                )
+    }
+    Button(
+        onClick = {
+            navController.navigate(NavItem.Story.route)
+        },
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
 
-            }
-        }
-
+        modifier = Modifier
+            .padding(top = 700.dp, start = 18.dp, end = 18.dp, bottom = 20.dp)
+            .fillMaxWidth()
+            .background(
+                color = colorResource(id = R.color.white),
+                shape = RoundedCornerShape(16.dp)
+            )
+    ) {
+        Text(
+            text = "이야기 체험하기",
+            color = Color.White,
+            fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+            fontSize = 18.sp,
+        )
     }
 }
