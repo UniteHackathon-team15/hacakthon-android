@@ -2,6 +2,7 @@ package com.hackathon.team15_android.presentation.di.module
 
 import android.util.Log
 import com.hackathon.team15_android.BuildConfig
+import com.hackathon.team15_android.data.remote.api.PostAPI
 import com.hackathon.team15_android.presentation.di.AiRetrofit
 import com.hackathon.team15_android.presentation.di.BaseRetrofit
 import dagger.Module
@@ -12,6 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -53,6 +55,7 @@ object NetworkModule {
             .addConverterFactory(gsonConverterFactory)
             .build()
     }
+
     @AiRetrofit
     @Provides
     @Singleton
@@ -72,4 +75,8 @@ object NetworkModule {
     fun provideConverterFactory(): GsonConverterFactory {
         return GsonConverterFactory.create()
     }
+
+    @Provides
+    @Singleton
+    fun providePostAPI(@BaseRetrofit retrofit: Retrofit): PostAPI = retrofit.create(PostAPI::class.java)
 }
