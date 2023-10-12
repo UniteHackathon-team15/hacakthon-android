@@ -44,11 +44,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.hackathon.team15_android.R
+import com.hackathon.team15_android.presentation.ui.main.MainViewModel
 import com.hackathon.team15_android.presentation.ui.main.data.Test
 import com.hackathon.team15_android.presentation.ui.main.data.TestDataProvider
 
 @Composable
-fun LibraryScreen() {
+fun LibraryScreen(
+
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -223,14 +226,3 @@ fun Preview() {
 }
 
 
-@Composable
-fun PublicationScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.white))
-            .wrapContentSize(Alignment.Center)
-    ) {
-
-    }
-}

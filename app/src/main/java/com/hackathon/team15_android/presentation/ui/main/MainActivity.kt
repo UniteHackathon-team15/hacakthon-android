@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
@@ -25,7 +26,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hackathon.team15_android.R
-import com.hackathon.team15_android.presentation.ui.main.item.NavigationItem
+import com.hackathon.team15_android.presentation.ui.main.item.BottomNavigationItem
+import com.hackathon.team15_android.presentation.ui.main.item.NavItem
+import com.hackathon.team15_android.presentation.ui.main.screen.EditScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.LibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.PublicationScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.StoryScreen
@@ -33,6 +36,9 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    val viewModel : MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -43,9 +49,9 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun BottomNavigationBar(navController: NavController) {
         val items = listOf(
-            NavigationItem.Library,
-            NavigationItem.Story,
-            NavigationItem.Publication,
+            BottomNavigationItem.Library,
+            BottomNavigationItem.Story,
+            BottomNavigationItem.Publication,
         )
         BottomNavigation(
             backgroundColor = colorResource(id = R.color.white),
@@ -83,18 +89,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     @Composable
     fun Navigation(navController: NavHostController) {
-        NavHost(navController, startDestination = NavigationItem.Library.route) {
-            composable(NavigationItem.Library.route) {
+        NavHost(navController, startDestination = NavItem.Library.route) {
+            composable(NavItem.Library.route) {
                 LibraryScreen()
             }
-            composable(NavigationItem.Story.route) {
+            composable(NavItem.Story.route) {
                 StoryScreen()
             }
-            composable(NavigationItem.Publication.route) {
-                PublicationScreen()
+            composable(NavItem.Publication.route) {
+                PublicationScreen(mainViewModel = viewModel,navController = navController)
+            }
+            composable(NavItem.Edit.route){
+                EditScreen(mainViewModel = viewModel)
             }
         }
     }
