@@ -3,6 +3,7 @@ package com.hackathon.team15_android.data.remote.api
 import com.hackathon.team15_android.data.remote.dto.response.post.DetailPostResponse
 import com.hackathon.team15_android.data.remote.dto.response.post.PostResponse
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface PostAPI {
 
@@ -10,5 +11,8 @@ interface PostAPI {
     suspend fun getPostList(): List<PostResponse>
 
     @GET("/posts/")
-    suspend fun getDetailPostList() : List<DetailPostResponse>
+    suspend fun getDetailPostList(
+        @Query("post-id") postId: Long,
+        @Query("post-details-id") postDetailsOd: Long,
+    ): List<DetailPostResponse>
 }
