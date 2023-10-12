@@ -1,12 +1,11 @@
 package com.hackathon.team15_android.presentation.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hackathon.team15_android.data.remote.dto.response.post.PostResponse
+import com.hackathon.team15_android.data.remote.dto.response.post.DetailPostResponse
 import com.hackathon.team15_android.data.repository.PostRepository
 import com.hackathon.team15_android.presentation.ui.main.util.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,19 +14,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PostListViewModel @Inject constructor(
-    private val getPostListRepository: PostRepository
+class MainViewModel @Inject constructor(
+    private val postRepository: PostRepository,
 ) : ViewModel() {
-    var postList by mutableStateOf<List<PostResponse>?>(null)
-
-    fun getPostList() = viewModelScope.launch(Dispatchers.IO) {
+    var detailPost = mutableStateOf<DetailPostResponse?>(null)
+    fun getDetailPost(postId: Long, postDetailId: Long) = viewModelScope.launch(Dispatchers.IO) {
         kotlin.runCatching {
-            getPostListRepository.getPostList()
+            postRepository.getDetailPost(postId = postId, postDetailId = postDetailId)
         }.onSuccess {
-            postList = it
+            detailPost.value = it
         }.onFailure {
-            postList = null
-            Log.d(TAG, "getPostList에러 - $it ")
+            Log.d(TAG, "detailPost에러 - $it ")
         }
+
     }
+
 }

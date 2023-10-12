@@ -11,8 +11,8 @@ interface PostAPI {
     suspend fun getPostList(): List<PostResponse>
 
     @GET("/posts/")
-    suspend fun getDetailPostList(
+    suspend fun getDetailPost(
         @Query("post-id") postId: Long,
         @Query("post-details-id") postDetailsOd: Long,
-    ): List<DetailPostResponse>
+    ): DetailPostResponse
 }
