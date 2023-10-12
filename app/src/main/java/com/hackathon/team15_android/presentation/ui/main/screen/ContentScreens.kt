@@ -1,13 +1,14 @@
 package com.hackathon.team15_android.presentation.ui.main.screen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,14 +18,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -40,7 +46,6 @@ import coil.compose.AsyncImage
 import com.hackathon.team15_android.R
 import com.hackathon.team15_android.presentation.ui.main.data.Test
 import com.hackathon.team15_android.presentation.ui.main.data.TestDataProvider
-import com.hackathon.team15_android.presentation.ui.theme.Black
 
 @Composable
 fun LibraryScreen() {
@@ -52,7 +57,7 @@ fun LibraryScreen() {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
         ) {
             val svgImage: Painter = painterResource(R.drawable.ic_library)
             Image(
@@ -75,7 +80,12 @@ fun LibraryScreen() {
                     .padding(top = 24.dp)
             )
         }
-        LibraryLazyColumn()
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+        ) {
+            LibraryLazyColumn()
+        }
     }
 }
 
@@ -92,25 +102,29 @@ fun LibraryLazyColumn() {
 
 @Composable
 fun TestListItem(test: Test) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 12.dp),
-        elevation = 4.dp,
-    ) {
-        Row {
-            LibraryImage(test = test)
-            Column (
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Text(text = test.name)
-                Text(text = test.content, modifier = Modifier.padding(0.dp, 2.dp))
-
+    for (i in 1..30) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 12.dp),
+            elevation = 4.dp,
+        ) {
+            Row {
+                LibraryImage(test = test)
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Text(
+                        text = test.name,
+                        modifier = Modifier
+                    )
+                    Text(text = test.content, modifier = Modifier.padding(0.dp, 2.dp))
+                }
             }
-        }
 
+        }
     }
 }
 
@@ -126,24 +140,88 @@ fun LibraryImage(test: Test) {
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LibraryScreenPreView() {
-    LibraryScreen()
-}
-
-
 @Composable
 fun StoryScreen() {
+    var page by remember { mutableStateOf(1) }
+    val imageModifier = Modifier
+        .fillMaxWidth()
+
+    val textButtonModifier = Modifier
+        .width(390.dp)
+        .height(58.dp)
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.white))
-            .wrapContentSize(Alignment.Center)
     ) {
+        Text(
+            text = "모솔의 사랑이야기 - $page",
+            fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+            fontSize = 20.sp,
+            color = Color.Black,
+            modifier = Modifier
+                .padding(24.dp)
+        )
 
+        Column(
+            modifier = Modifier
+                .weight(1F)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.test2_image),
+                contentDescription = "novel image",
+                modifier = imageModifier,
+                contentScale = ContentScale.FillWidth,
+            )
+
+            Text(
+                text = "모솔의 사랑이야기",
+                fontSize = 20.sp,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                color = Color.Black,
+                modifier = Modifier
+                    .padding(start = 18.dp, top = 15.dp)
+            )
+
+            Text(
+                text = "2023년, 어느 모솔의 사랑이야기가 온다 과연 주인공은 사랑을 쟁취할 수 있을까?",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                color = Color.Gray,
+                modifier = Modifier
+                    .padding(start = 18.dp, top = 4.dp, end = 18.dp)
+            )
+        }
+
+        TextButton(onClick = { page += 1 }) {
+            Text(
+                text = "다음",
+                color = Color.Black,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                fontSize = 16.sp,
+                modifier =
+                textButtonModifier
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Black, Color.White),
+                            startY = 0f,
+                            endY = 2f,
+                        )
+                    )
+                    .padding(5.dp)
+            )
+        }
     }
 }
+
+
+@Preview(showBackground = true)
+@Composable
+fun Preview() {
+    StoryScreen()
+}
+
 
 @Composable
 fun PublicationScreen() {
