@@ -1,7 +1,9 @@
 package com.hackathon.team15_android.presentation.ui.main.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,16 +22,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -42,13 +49,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.hackathon.team15_android.R
 import com.hackathon.team15_android.presentation.ui.main.data.Test
 import com.hackathon.team15_android.presentation.ui.main.data.TestDataProvider
+import com.hackathon.team15_android.presentation.ui.main.item.NavItem
+import kotlinx.coroutines.launch
 
 @Composable
-fun LibraryScreen() {
+fun LibraryScreen(navController: NavController) {
+    var selectedItem by remember { mutableStateOf<Test?>(null) }
+    val svgImage: Painter = painterResource(R.drawable.ic_library)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -59,7 +72,6 @@ fun LibraryScreen() {
             horizontalArrangement = Arrangement.Start,
             modifier = Modifier
         ) {
-            val svgImage: Painter = painterResource(R.drawable.ic_library)
             Image(
                 painter = svgImage,
                 contentDescription = "Library page icon SVG Image",
@@ -84,30 +96,44 @@ fun LibraryScreen() {
             modifier = Modifier
                 .fillMaxHeight()
         ) {
-            LibraryLazyColumn()
+            LibraryLazyColumn(navController) { test ->
+                selectedItem = test
+            }
         }
+    }
+    selectedItem?.let {
+        DetailLibraryScreen(navController = navController)
     }
 }
 
+
 @Composable
-fun LibraryLazyColumn() {
+fun LibraryLazyColumn(navController: NavController, onItemClick: (Test) -> Unit) {
     val testItems = remember { TestDataProvider.libraryList }
     LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp)) {
         items(
             items = testItems,
-            itemContent = { TestListItem(it) }
+            itemContent = { TestListItem(it, onItemClick) }
         )
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TestListItem(test: Test) {
+fun TestListItem(test: Test, onItemClick: (Test) -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
+
     for (i in 1..30) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(0.dp, 12.dp),
             elevation = 4.dp,
+            onClick = {
+                coroutineScope.launch {
+                    onItemClick(test)
+                }
+            }
         ) {
             Row {
                 LibraryImage(test = test)
@@ -219,7 +245,7 @@ fun StoryScreen() {
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    StoryScreen()
+    DetailLibraryScreen(navController = rememberNavController())
 }
 
 
@@ -231,6 +257,85 @@ fun PublicationScreen() {
             .background(colorResource(id = R.color.white))
             .wrapContentSize(Alignment.Center)
     ) {
+
+    }
+}
+
+@Composable
+fun DetailLibraryScreen(navController: NavController) {
+    val imageModifier = Modifier
+        .fillMaxWidth()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.white))
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_back_button),
+            contentDescription = "Detail Library page icon SVG Image",
+            modifier = Modifier
+                .padding(start = 26.dp, top = 23.dp)
+                .clickable {
+                    navController.popBackStack()
+                }
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1F)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.test1_image),
+                contentDescription = " Detail Library page Image",
+                contentScale = ContentScale.FillWidth,
+                modifier = imageModifier
+                    .padding(top = 24.dp)
+            )
+            Text(
+                text = "모솔의 사랑이야기",
+                fontSize = 20.sp,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                color = Color.Black,
+                modifier = Modifier
+                    .padding(start = 18.dp, top = 15.dp)
+            )
+
+            Text(
+                text = "2023년, 어느 모솔의 사랑이야기가 온다 과연 주인공은 사랑을 쟁취할 수 있을까?",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                color = Color.Gray,
+                modifier = Modifier
+                    .padding(start = 18.dp, top = 4.dp, end = 18.dp)
+            )
+
+        }
+        Box(
+            contentAlignment = Alignment.BottomCenter,
+            modifier = Modifier
+                .padding(start = 44.dp, bottom = 16.dp)
+        ) {
+            Button(
+                onClick = {
+                    navController.navigate(NavItem.Story.route)
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
+
+                modifier = Modifier
+                    .width(324.dp)
+                    .height(45.dp)
+                    .scale(1f)
+            ) {
+                Text(
+                    text = "이야기 체험하기",
+                    color = Color.White,
+                    fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                    fontSize = 18.sp,
+                )
+
+            }
+        }
 
     }
 }
