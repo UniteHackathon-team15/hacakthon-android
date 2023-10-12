@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import com.hackathon.team15_android.R
 import com.hackathon.team15_android.presentation.ui.main.item.BottomNavigationItem
 import com.hackathon.team15_android.presentation.ui.main.item.NavItem
+import com.hackathon.team15_android.presentation.ui.main.screen.DetailLibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.EditScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.LibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.PublicationScreen
@@ -89,11 +90,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
     @Composable
     fun Navigation(navController: NavHostController) {
         NavHost(navController, startDestination = NavItem.Library.route) {
             composable(NavItem.Library.route) {
-                LibraryScreen()
+                LibraryScreen(navController)
             }
             composable(NavItem.Story.route) {
                 StoryScreen()
@@ -103,6 +105,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(NavItem.Edit.route){
                 EditScreen(mainViewModel = viewModel)
+            }
+            composable(NavItem.Detail.route) {
+                DetailLibraryScreen(navController = rememberNavController())
             }
         }
     }

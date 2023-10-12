@@ -2,6 +2,8 @@ package com.hackathon.team15_android.presentation.di.module
 
 import android.util.Log
 import com.hackathon.team15_android.BuildConfig
+import com.hackathon.team15_android.presentation.di.AiRetrofit
+import com.hackathon.team15_android.presentation.di.BaseRetrofit
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,14 +40,28 @@ object NetworkModule {
             .build()
     }
 
+    @BaseRetrofit
     @Provides
     @Singleton
-    fun provideRetrofitInstance(
+    fun provideBaseRetrofitInstance(
         okHttpClient: OkHttpClient,
         gsonConverterFactory: GsonConverterFactory
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(gsonConverterFactory)
+            .build()
+    }
+    @AiRetrofit
+    @Provides
+    @Singleton
+    fun provideAiRetrofitInstance(
+        okHttpClient: OkHttpClient,
+        gsonConverterFactory: GsonConverterFactory
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.AI_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(gsonConverterFactory)
             .build()

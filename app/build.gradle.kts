@@ -30,7 +30,6 @@ android {
             getApiKey("BASE_URL")
         )
 
-
         buildConfigField(
             "String",
             "AI_BASE_URL",
@@ -98,9 +97,6 @@ dependencies {
     implementation(Dependency.Libraries.COIL)
 
     implementation(Dependency.AndroidX.SPLASH)
-
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
-
 }
 
 fun getApiKey(propertyKey: String): String {

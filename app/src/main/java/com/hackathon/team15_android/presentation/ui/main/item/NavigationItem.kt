@@ -16,4 +16,3 @@ sealed class NavItem(var route : String){
     object Detail: NavItem("detail")
     object Edit : NavItem("Edit")
 }
-
