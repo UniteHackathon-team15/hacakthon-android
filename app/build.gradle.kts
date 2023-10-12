@@ -95,6 +95,7 @@ dependencies {
     implementation(Dependency.DataStore.PREFERENCES)
 
     implementation(Dependency.Libraries.COIL)
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     implementation(Dependency.AndroidX.SPLASH)
 }

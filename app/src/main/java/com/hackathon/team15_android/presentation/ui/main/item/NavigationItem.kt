@@ -14,4 +14,5 @@ sealed class NavItem(var route : String){
     object Publication: NavItem("publication")
     object Preview: NavItem("preview")
     object Detail: NavItem("detail")
+    object Edit : NavItem("Edit")
 }
