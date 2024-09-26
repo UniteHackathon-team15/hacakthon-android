@@ -2,8 +2,11 @@ package com.hackathon.team15_android.presentation.di.module
 
 import android.util.Log
 import com.hackathon.team15_android.BuildConfig
+import com.hackathon.team15_android.data.remote.api.AiAPI
 import com.hackathon.team15_android.data.remote.api.PostAPI
+import com.hackathon.team15_android.presentation.di.AiOkthttp
 import com.hackathon.team15_android.presentation.di.AiRetrofit
+import com.hackathon.team15_android.presentation.di.BaseOkthttp
 import com.hackathon.team15_android.presentation.di.BaseRetrofit
 import dagger.Module
 import dagger.Provides
@@ -21,24 +24,27 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides
-    fun provideHttpLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor { message -> Log.v("HTTP", message) }
-            .setLevel(HttpLoggingInterceptor.Level.BODY)
-    }
-
+    @BaseOkthttp
     @Provides
     @Singleton
-    fun provideOkhttpClient(
-        httpLoggingInterceptor: HttpLoggingInterceptor,
+    fun provideBaseOkhttpClient(
     ): OkHttpClient {
         return OkHttpClient.Builder()
-            // 요청을 시작한 후 서버와의 TCP handshake 가 완료되기까지 지속되는 시간
             .connectTimeout(30, TimeUnit.SECONDS)
-            // 모든 바이트가 전송되는 속도륵 감시
             .readTimeout(30, TimeUnit.SECONDS)
-            // 읽기 타임 아웃의 반대 방향. 얼마나 빨리 서버에 바이트를 보낼 수 있는지 확인
             .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @AiOkthttp
+    @Provides
+    @Singleton
+    fun provideAIOkhttpClient(
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(20000, TimeUnit.SECONDS)
+            .readTimeout(20000, TimeUnit.SECONDS)
+            .writeTimeout(20000, TimeUnit.SECONDS)
             .build()
     }
 
@@ -46,7 +52,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideBaseRetrofitInstance(
-        okHttpClient: OkHttpClient,
+        @BaseOkthttp okHttpClient: OkHttpClient,
         gsonConverterFactory: GsonConverterFactory
     ): Retrofit {
         return Retrofit.Builder()
@@ -60,7 +66,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAiRetrofitInstance(
-        okHttpClient: OkHttpClient,
+        @AiOkthttp okHttpClient: OkHttpClient,
         gsonConverterFactory: GsonConverterFactory
     ): Retrofit {
         return Retrofit.Builder()
@@ -79,4 +85,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun providePostAPI(@BaseRetrofit retrofit: Retrofit): PostAPI = retrofit.create(PostAPI::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAiAPI(@AiRetrofit retrofit: Retrofit): AiAPI = retrofit.create(AiAPI::class.java)
 }

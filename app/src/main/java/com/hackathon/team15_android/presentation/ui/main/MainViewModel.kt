@@ -6,11 +6,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hackathon.team15_android.data.remote.dto.PostStoryRequest
+import com.hackathon.team15_android.data.remote.dto.response.post.DetailPostResponse
+import com.hackathon.team15_android.data.remote.dto.response.post.PostResponse
+import com.hackathon.team15_android.data.repository.AiRepository
+import com.hackathon.team15_android.data.repository.PostRepository
 import com.hackathon.team15_android.presentation.ui.main.util.TAG
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel: ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val postRepository: PostRepository,
+    private val aiRepository: AiRepository
+): ViewModel() {
 
     var nodeList = mutableListOf<TreeNode>()
 
@@ -18,7 +29,7 @@ class MainViewModel: ViewModel() {
 
     var rootNode = TreeNode(
         id++,
-        "시작 노드 입니다",
+        "",
         depth = 0,
         width = 0
     ).also {
@@ -29,25 +40,77 @@ class MainViewModel: ViewModel() {
 
 //    var previousNode : TreeNode? = null
 
-    var storyTitle : String = "살아야만 한다"
+    var storyTitle : String = ""
+
+    var storySummary : String = ""
 
     var choiceListArr = Array(1000) { mutableListOf<ChoiceData>() }
 
+    var currentStory : PostResponse? = null
+
+    var currentPage : DetailPostResponse? = null
+
+    var aiText = mutableStateOf("")
+
+    fun getDetailPost(storyId : Long, pageId : Long) = viewModelScope.launch(Dispatchers.IO) {
+        kotlin.runCatching {
+            postRepository.getDetailPost(
+                postDetailId = pageId,
+                postId = storyId
+            )
+        }.onSuccess {
+            currentPage = it
+
+        }.onFailure {
+            Log.d(TAG, "getDetailPost에러 - $it ")
+        }
+    }
+
+    fun getFirstStory(question : String) = viewModelScope.launch(Dispatchers.IO) {
+        kotlin.runCatching {
+            aiRepository.getFirstStory(
+                question
+            )
+        }.onSuccess {
+            aiText.value = it
+            Log.d(TAG,"MainViewModel - getFirstStory() : $it")
+        }.onFailure {
+            Log.d(TAG, "getFirstStory에러 - $it ")
+        }
+    }
+
+    fun postStory(storyRequest: PostStoryRequest) : Boolean {
+
+        var result = false
+
+        viewModelScope.launch(Dispatchers.IO){
 
 
 
+            kotlin.runCatching {
+                postRepository.postStory(storyRequest)
+            }.onSuccess {
+                nodePositionList.clear()
+                positionArr = Array<Array<TreeNode?>>(1000){
+                    Array<TreeNode?>(1000){null}
+                }
+                edgeList.clear()
+                widthArr = Array(1000){0}
+                edgeArr = Array(1000){Array<EdgeData?>(3){null} }
 
+                result = true
 
+                Log.d(TAG,"MainViewModel - postStory() : $it")
+            }.onFailure {
+                Log.d(TAG, "postStory에러 - $it ")
 
+            }
 
+        }
 
+        return result
 
-
-
-
-
-
-
+    }
 
 
     var positionArr by mutableStateOf(Array<Array<TreeNode?>>(1000){
@@ -192,7 +255,41 @@ class MainViewModel: ViewModel() {
 
     }
 
+    fun combineData() : PostStoryRequest{
+
+        val list = mutableListOf <RequestData>()
+
+        for (i in positionArr){
+            for (j in i){
+                if (j != null){
+                    list.add(RequestData(
+                        stage_id = j.id,
+                        content = j.text,
+                        first_option_id = if (j.choice[0] == null) 0 else j.choice[0]!!.DestinationNode.id,
+                        first_option_content = if (j.choice[0] == null) "" else j.choice[0]!!.text,
+                        second_option_id = if (j.choice[1] == null) 0 else j.choice[1]!!.DestinationNode.id,
+                        second_option_content = if (j.choice[1] == null) "" else j.choice[1]!!.text,
+                        third_option_id = if (j.choice[2] == null) 0 else j.choice[2]!!.DestinationNode.id,
+                        third_option_content = if (j.choice[2] == null) "" else j.choice[2]!!.text,
+
+                    ))
+                }
+            }
+        }
+
+        var result = PostStoryRequest(
+            title = storyTitle,
+            summary = storySummary,
+            image = "",
+            post_details_list = list
+        )
+
+        return result
+    }
+
 }
+
+
 
 data class TreeNode(
     val id : Int,
@@ -208,6 +305,11 @@ data class ChoiceData(
     var text: String
 )
 
+data class RouteData(
+    val id : Int,
+    val text : String
+)
+
 data class NodePosition(
     val node : TreeNode,
     val x : Int,
@@ -217,4 +319,15 @@ data class NodePosition(
 data class EdgeData(
     var prevNode : TreeNode,
     var node : TreeNode
+)
+
+data class RequestData(
+    val stage_id : Int,
+    val content : String,
+    val first_option_id : Int,
+    val first_option_content : String,
+    val second_option_id : Int,
+    val second_option_content : String,
+    val third_option_id : Int,
+    val third_option_content : String
 )

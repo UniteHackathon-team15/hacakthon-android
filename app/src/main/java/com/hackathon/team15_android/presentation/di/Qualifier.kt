@@ -9,3 +9,11 @@ annotation class BaseRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class AiRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AiOkthttp
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class BaseOkthttp

@@ -18,6 +18,7 @@ import javax.inject.Inject
 class PostListViewModel @Inject constructor(
     private val getPostListRepository: PostRepository
 ) : ViewModel() {
+
     var postList by mutableStateOf<List<PostResponse>?>(null)
 
     fun getPostList() = viewModelScope.launch(Dispatchers.IO) {

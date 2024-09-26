@@ -1,8 +1,11 @@
 package com.hackathon.team15_android.presentation.ui.main.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,270 +49,199 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.hackathon.team15_android.R
+import com.hackathon.team15_android.data.remote.dto.response.post.DetailPostResponse
+import com.hackathon.team15_android.presentation.ui.main.ChoiceData
+import com.hackathon.team15_android.presentation.ui.main.MainViewModel
+import com.hackathon.team15_android.presentation.ui.main.RouteData
 import com.hackathon.team15_android.presentation.ui.main.data.Test
 import com.hackathon.team15_android.presentation.ui.main.data.TestDataProvider
 import com.hackathon.team15_android.presentation.ui.main.item.NavItem
+import com.hackathon.team15_android.presentation.ui.main.util.TAG
 import com.hackathon.team15_android.presentation.viewmodel.PostListViewModel
 import kotlinx.coroutines.launch
 
+
 @Composable
-fun LibraryScreen(
-    navController: NavController,
-    postListViewModel: PostListViewModel,
-) {
-    var selectedItem by remember { mutableStateOf<Test?>(null) }
-    val svgImage: Painter = painterResource(R.drawable.ic_library)
+fun ChoiceItem(
+    data : RouteData,
+    index : Int,
+    onClick : (i : Int) -> Unit
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ){
+
+        androidx.compose.material3.Text(
+            text = data.text,
+            color = Color(0xFF5B5B5B),
+            fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp,
+            modifier = Modifier.clickable {
+                onClick(data.id)
+            }
+        )
+
+    }
+}
+
+fun makeChoiceList(
+    currentPage : DetailPostResponse?,
+) : List<RouteData>?{
+
+    if (currentPage == null) return null
+
+    val result = mutableListOf<RouteData>()
+
+    if(currentPage.firstOptionItem != 0 && currentPage.firstOptionContent != ""){
+        result.add(RouteData(currentPage.firstOptionItem,currentPage.firstOptionContent))
+    }
+    if (currentPage.secondOptionItem != 0 && currentPage.secondOptionContent != ""){
+        result.add(RouteData(currentPage.secondOptionItem,currentPage.secondOptionContent))
+    }
+    if (currentPage.thirdOptionItem != 0 && currentPage.thirdOptionContent != ""){
+        result.add(RouteData(currentPage.thirdOptionItem,currentPage.thirdOptionContent))
+    }
+    if (result.isEmpty()) return null
+
+    return result
+
+}
+
+@Composable
+fun StoryContent(
+    mainViewModel : MainViewModel,
+    currentPage : DetailPostResponse?,
+    choiceList : List<RouteData>?,
+    isChanged : Boolean
+){
+    if(isChanged){
+
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.white))
+            .background(colorResource(id = R.color.white)),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-            modifier = Modifier
-        ) {
-            val svgImage: Painter = painterResource(R.drawable.ic_library)
-            Image(
-                painter = svgImage,
-                contentDescription = "Library page icon SVG Image",
-                modifier = Modifier
-                    .padding(start = 26.dp, top = 23.dp)
-            )
-
-            Spacer(modifier = Modifier.width(7.dp))
-
+        Column{
             Text(
-                text = "채종인 도서관",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                    color = Color.Black,
-                ),
+                text = mainViewModel.currentStory!!.title,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                fontSize = 20.sp,
+                color = Color.Black,
                 modifier = Modifier
-                    .padding(top = 24.dp)
+                    .padding(24.dp)
             )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-        ) {
-            LibraryLazyColumn()
-        }
-    }
-}
 
-@Composable
-fun LibraryLazyColumn() {
-    val testItems = remember { TestDataProvider.libraryList }
-    LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp)) {
-        items(
-            items = testItems,
-            itemContent = { TestListItem(it) }
-        )
-    }
-}
-
-@Composable
-fun TestListItem(test: Test) {
-    for (i in 1..30) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp, 12.dp),
-            elevation = 4.dp,
-        ) {
-            Row {
-                LibraryImage(test = test)
-                Column(
+            Column() {
+                Image(
+                    painter = painterResource(id = R.drawable.apo2),
+                    contentDescription = "novel image",
                     modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.CenterVertically)
-                ) {
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.FillWidth,
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                if (currentPage != null) {
                     Text(
-                        text = test.name,
+                        text = currentPage!!.content,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                        color = Color.Black,
                         modifier = Modifier
+                            .padding(horizontal = 20.dp)
                     )
-                    Text(text = test.content, modifier = Modifier.padding(0.dp, 2.dp))
+                } else {
+                    Text(
+                        text = "이야기가 존재하지 않습니다",
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                        color = Color.Black,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                    )
+                }
+
+            }
+        }
+
+        Column{
+            Spacer(modifier = Modifier
+                .fillMaxWidth()
+                .height(2.dp)
+                .background(Color.Black))
+
+            if (choiceList != null) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    itemsIndexed(
+                        choiceList
+                    ) { index: Int, item: RouteData ->
+                        ChoiceItem(item, index, {
+                        mainViewModel.getDetailPost(mainViewModel.currentStory!!.postId.toLong(),it.toLong())
+//                            mainViewModel.currentPage =
+//                                DetailPostResponse("하하하", 1, "앞으로 안간다", 0, "", 0, "")
+                            mainViewModel.isChanged = !isChanged
+                        })
+                    }
                 }
             }
-
         }
+
+
     }
 }
 
 @Composable
-fun LibraryImage(test: Test) {
-    AsyncImage(
-        model = test.image,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .padding(8.dp)
-            .size(84.dp)
-    )
+fun StoryScreen(
+    mainViewModel: MainViewModel
+) {
+
+    val currentPage by rememberUpdatedState(newValue = mainViewModel.currentPage)
+
+    val scrollState = rememberScrollState()
+
+    val isChanged by rememberUpdatedState(newValue = mainViewModel.isChanged)
+
+    val choiceList = makeChoiceList(currentPage)
+    Log.d(TAG,"choiceList : ${choiceList}")
+
+    StoryContent(
+        mainViewModel = mainViewModel,
+        currentPage = currentPage,
+        choiceList = choiceList,
+        isChanged)
+
 }
 
-@Composable
-fun StoryScreen() {
-    var page by remember { mutableStateOf(1) }
-    val imageModifier = Modifier
-        .fillMaxWidth()
-
-    val textButtonModifier = Modifier
-        .width(390.dp)
-        .height(58.dp)
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.white))
-    ) {
-        Text(
-            text = "모솔의 사랑이야기 - $page",
-            fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-            fontSize = 20.sp,
-            color = Color.Black,
-            modifier = Modifier
-                .padding(24.dp)
-        )
-
-        Column(
-            modifier = Modifier
-                .weight(1F)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.test2_image),
-                contentDescription = "novel image",
-                modifier = imageModifier,
-                contentScale = ContentScale.FillWidth,
-            )
-
-            Text(
-                text = "모솔의 사랑이야기",
-                fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                color = Color.Black,
-                modifier = Modifier
-                    .padding(start = 18.dp, top = 15.dp)
-            )
-
-            Text(
-                text = "2023년, 어느 모솔의 사랑이야기가 온다 과연 주인공은 사랑을 쟁취할 수 있을까?",
-                fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                color = Color.Gray,
-                modifier = Modifier
-                    .padding(start = 18.dp, top = 4.dp, end = 18.dp)
-            )
-        }
-
-        TextButton(onClick = { page += 1 }) {
-            Text(
-                text = "다음",
-                color = Color.Black,
-                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                fontSize = 16.sp,
-                modifier =
-                textButtonModifier
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.Black, Color.White),
-                            startY = 0f,
-                            endY = 2f,
-                        )
-                    )
-                    .padding(5.dp)
-            )
-        }
-    }
-}
 
 
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    StoryScreen()
+//    StoryScreen()
 }
 
 
-@Composable
-fun DetailLibraryScreen(navController: NavController) {
-    val imageModifier = Modifier
-        .fillMaxWidth()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.white))
-    ) {
-        Image(
-            painter = painterResource(R.drawable.ic_back),
-            contentDescription = "Detail Library page icon SVG Image",
-            modifier = Modifier
-                .padding(start = 26.dp, top = 23.dp)
-                .clickable {
-                    navController.popBackStack()
-                }
-        )
 
-        Column(
-            modifier = Modifier
-                .weight(1F)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.test1_image),
-                contentDescription = " Detail Library page Image",
-                contentScale = ContentScale.FillWidth,
-                modifier = imageModifier
-                    .padding(top = 24.dp)
-            )
-            Text(
-                text = "모솔의 사랑이야기",
-                fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                color = Color.Black,
-                modifier = Modifier
-                    .padding(start = 18.dp, top = 15.dp)
-            )
 
-            Text(
-                text = "2023년, 어느 모솔의 사랑이야기가 온다 과연 주인공은 사랑을 쟁취할 수 있을까?",
-                fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-                color = Color.Gray,
-                modifier = Modifier
-                    .padding(start = 18.dp, top = 4.dp, end = 18.dp)
-            )
 
-        }
-
-    }
-    Button(
-        onClick = {
-            navController.navigate(NavItem.Story.route)
-        },
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray),
-
-        modifier = Modifier
-            .padding(top = 700.dp, start = 18.dp, end = 18.dp, bottom = 20.dp)
-            .fillMaxWidth()
-            .background(
-                color = colorResource(id = R.color.white),
-                shape = RoundedCornerShape(16.dp)
-            )
-    ) {
-        Text(
-            text = "이야기 체험하기",
-            color = Color.White,
-            fontFamily = FontFamily(Font(R.font.pretendard_medium)),
-            fontSize = 18.sp,
-        )
-    }
-}

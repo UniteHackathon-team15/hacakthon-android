@@ -44,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.hackathon.team15_android.R
 import com.hackathon.team15_android.presentation.ui.main.ChoiceData
 import com.hackathon.team15_android.presentation.ui.main.MainViewModel
+import kotlinx.coroutines.coroutineScope
 import okhttp3.internal.wait
 
 @Composable
@@ -55,6 +56,7 @@ fun EditScreen(
     val choiceList by rememberUpdatedState(newValue = mainViewModel.choiceListArr[mainViewModel.currentNode.id])
     val context = LocalContext.current
     val isChanged by rememberUpdatedState(newValue = viewModel.isChanged)
+    val aiText by rememberUpdatedState(newValue = mainViewModel.aiText)
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -68,7 +70,8 @@ fun EditScreen(
                 {
                     mainViewModel.currentNode.text = it
                 },
-                mainViewModel
+                mainViewModel,
+                aiText.value
             )
         }
 
@@ -109,7 +112,7 @@ fun EditScreen(
 @Composable
 fun PreviewEditScreen(){
 
-    EditScreen(MainViewModel())
+//    EditScreen(MainViewModel())
 }
 
 @Composable
@@ -149,7 +152,8 @@ fun TopBar(
 @Composable
 fun EditContent(
     onTextChange : (text : String) -> Unit,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    aiText : String
 ){
     var textValue by remember { mutableStateOf(mainViewModel.currentNode.text) }
 
@@ -164,7 +168,7 @@ fun EditContent(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
                 .padding(top = 20.dp),
-            value = textValue,
+            value = textValue + aiText,
             onValueChange = {
                 textValue = it
             },
@@ -196,8 +200,73 @@ fun EditContent(
             )
 
         )
+    }
+
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+
+        ){
+
+        var textValue by remember{ mutableStateOf("") }
+
+        BasicTextField(
+            modifier = Modifier,
+            value = textValue,
+            onValueChange = {
+                textValue = it
+            },
+            decorationBox = { innerTextField ->
+                if(textValue.isEmpty()){
+                    Text(
+                        "AI가 문구를 적어드려요",
+                        color = Color(0xFFA5A5A5),
+                        fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
+                    )
+                }
+                else {
+                    Text(
+                        textValue,
+                        color = Color(0xFF000000),
+                        fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
+                    )
+                }
+            },
+            textStyle = TextStyle(
+                color = Color.Black,
+                fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp
+            )
+        )
+
+        Spacer(modifier = Modifier.width(5.dp))
+
+        Image(
+            modifier = Modifier
+                .height(24.dp)
+                .width(24.dp)
+                .clickable {
+                    mainViewModel.getFirstStory(textValue)
+                    textValue = ""
+                },
+            painter = painterResource(id = R.drawable.ic_plus),
+            contentDescription = ""
+        )
+
 
     }
+
+
 }
 
 @Composable

@@ -93,23 +93,6 @@ fun PublicationScreen(
         edgeList,
         {
 
-//            if (it.choice[0] == null){
-//                mainViewModel.addNode(it,"${mainViewModel.id}번째 페이지입니다",1,"")
-//                Log.d(TAG, "choice1 - ${mainViewModel.id}번째 페이지입니다")
-//
-//            }
-//            else if (it.choice[1] == null){
-//                mainViewModel.addNode(it,"${mainViewModel.id}번째 페이지입니다",2,"")
-//                Log.d(TAG, "choice2 - ${mainViewModel.id}번째 페이지입니다")
-//            }
-//            else if (it.choice[2] == null){
-//                mainViewModel.addNode(it,"${mainViewModel.id}번째 페이지입니다",3,"")
-//                Log.d(TAG, "choice3 - ${mainViewModel.id}번째 페이지입니다")
-//            }
-//            else{
-//                Log.d(TAG, "미친거 아니야?")
-//            }
-
             mainViewModel.currentNode = it
             mainViewModel.isChanged = !mainViewModel.isChanged
 
@@ -121,14 +104,17 @@ fun PublicationScreen(
             Log.d(TAG," - onEditClick")
             navController.navigate(NavItem.Edit.route)
                       },
-        {}
+        onPlusClick = {
+            val isSuccess = mainViewModel.postStory(mainViewModel.combineData())
+            if(isSuccess) navController.popBackStack()
+        }
     )
 }
 
 @Preview
 @Composable
 fun PreviewPublicationScreen(){
-    PublicationScreen(MainViewModel(), navController = rememberNavController())
+//    PublicationScreen(MainViewModel(), navController = rememberNavController())
 }
 
 @Composable
@@ -177,7 +163,7 @@ fun DraggableAndZoomableView(
         BottomPage(
             mainViewModel = mainViewModel,
             onEditClick = onEditClick,
-            onPlusClick
+            onPlusClick = onPlusClick
         )
 
     }
@@ -270,7 +256,7 @@ fun BottomPage(
                     contentDescription = ""
                 )
                 Text(
-                    text = "존재하는 페이지에 선택지 추가하기",
+                    text = "이야기 편찬하기",
                     color = Color(0xFF5B5B5B),
                     fontFamily = FontFamily(Font(R.font.pretendard_medium)),
                     fontWeight = FontWeight.Medium,

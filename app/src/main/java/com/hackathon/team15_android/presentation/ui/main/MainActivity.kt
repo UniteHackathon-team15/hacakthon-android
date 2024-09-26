@@ -1,7 +1,6 @@
 package com.hackathon.team15_android.presentation.ui.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -28,12 +27,12 @@ import androidx.navigation.compose.rememberNavController
 import com.hackathon.team15_android.R
 import com.hackathon.team15_android.presentation.ui.main.item.BottomNavigationItem
 import com.hackathon.team15_android.presentation.ui.main.item.NavItem
+import com.hackathon.team15_android.presentation.ui.main.screen.CreateScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.DetailLibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.EditScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.LibraryScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.PublicationScreen
 import com.hackathon.team15_android.presentation.ui.main.screen.StoryScreen
-import com.hackathon.team15_android.presentation.viewmodel.PostListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -52,8 +51,7 @@ class MainActivity : ComponentActivity() {
     fun BottomNavigationBar(navController: NavController) {
         val items = listOf(
             BottomNavigationItem.Library,
-            BottomNavigationItem.Story,
-            BottomNavigationItem.Publication,
+            BottomNavigationItem.Create,
         )
         BottomNavigation(
             backgroundColor = colorResource(id = R.color.white),
@@ -96,10 +94,7 @@ class MainActivity : ComponentActivity() {
     fun Navigation(navController: NavHostController) {
         NavHost(navController, startDestination = NavItem.Library.route) {
             composable(NavItem.Library.route) {
-                LibraryScreen(navController, PostListViewModel())
-            }
-            composable(NavItem.Story.route) {
-                StoryScreen()
+                LibraryScreen(navController, viewModel)
             }
             composable(NavItem.Publication.route) {
                 PublicationScreen(mainViewModel = viewModel,navController = navController)
@@ -108,7 +103,13 @@ class MainActivity : ComponentActivity() {
                 EditScreen(mainViewModel = viewModel)
             }
             composable(NavItem.Detail.route) {
-                DetailLibraryScreen(navController = rememberNavController())
+                DetailLibraryScreen(navController = navController, viewModel)
+            }
+            composable(NavItem.Story.route){
+                StoryScreen(mainViewModel = viewModel)
+            }
+            composable(NavItem.Create.route){
+                CreateScreen(mainViewModel = viewModel, navController = navController)
             }
         }
     }

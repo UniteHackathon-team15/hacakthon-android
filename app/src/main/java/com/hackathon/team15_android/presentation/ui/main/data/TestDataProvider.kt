@@ -4,6 +4,6 @@ import com.hackathon.team15_android.R
 
 object TestDataProvider {
     val libraryList = listOf(
-        Test("test", R.drawable.test_image, "Test입니다.")
+        Test("test", R.drawable.apo2, "Test입니다.")
     )
 }
