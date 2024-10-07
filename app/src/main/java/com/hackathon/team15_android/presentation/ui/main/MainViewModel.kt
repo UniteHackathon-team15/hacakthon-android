@@ -52,6 +52,10 @@ class MainViewModel @Inject constructor(
 
     var aiText = mutableStateOf("")
 
+    fun findNodeById(id : Int) : TreeNode {
+        return nodeList.find { it.id == id }!!
+    }
+
     fun getDetailPost(storyId : Long, pageId : Long) = viewModelScope.launch(Dispatchers.IO) {
         kotlin.runCatching {
             postRepository.getDetailPost(
@@ -146,13 +150,36 @@ class MainViewModel @Inject constructor(
 
     }
 
-    fun addExistedNode(prevNode : TreeNode, node : TreeNode, choice : Int, choiceText : String){
+//    fun addExistedNode(prevNode : TreeNode, node : TreeNode, choice : Int, choiceText : String){
+//
+//        prevNode.choice[choice-1] = ChoiceData(node, choiceText)
+//
+//        viewModelScope.launch(Dispatchers.Main){
+//            makePosition()
+//        }
+//
+//        val choiceList = choiceListArr[currentNode.id]
+//        choiceList.add(
+//            ChoiceData(node,choiceText)
+//        )
+//    }
 
-        prevNode.choice[choice-1] = ChoiceData(node, choiceText)
+    fun addExistedNode(prevNode: TreeNode, node: TreeNode, choice: Int, choiceText: String) {
+        prevNode.choice[choice - 1] = ChoiceData(node, choiceText)
 
-        viewModelScope.launch(Dispatchers.Main){
+        // 기존 노드를 추가할 때 깊이 및 너비 충돌을 방지
+        viewModelScope.launch(Dispatchers.Main) {
+            // 이미 배치된 노드들 사이에서 겹침을 방지하기 위해 하위 노드들을 아래로 밀어내기
+//            if (prevNode.depth >= node.depth) {
+//                makeChildDown(node, prevNode.depth - node.depth + 1)
+//            }
+            // 전체 노드 배치 업데이트
             makePosition()
         }
+
+        // 선택지 추가
+        val choiceList = choiceListArr[currentNode.id]
+        choiceList.add(ChoiceData(node, choiceText))
     }
 
     suspend fun makeChildDown(node : TreeNode, how : Int){
@@ -224,6 +251,50 @@ class MainViewModel @Inject constructor(
 
         isChanged = !isChanged
     }
+
+//    suspend fun makePosition() {
+//        // 초기화
+//        widthArr = Array(1000) { 0 }
+//        edgeArr = Array(1000) { Array<EdgeData?>(3) { null } }
+//        positionArr = Array<Array<TreeNode?>>(1000) {
+//            Array<TreeNode?>(1000) { null }
+//        }
+//
+//        for (i in nodeList) {
+//            i.isVisited = false
+//        }
+//
+//        suspend fun recursion(prevNode: TreeNode?, node: TreeNode) {
+//            if (!node.isVisited) {
+//                node.isVisited = true
+//                // 너비 충돌 방지: 같은 깊이에 이미 노드가 있을 경우 위치를 조정
+//                if (positionArr[node.depth][widthArr[node.depth]] != null) {
+//                    makeChildDown(node, 1)
+//                }
+//                node.width = widthArr[node.depth]++
+//                positionArr[node.depth][node.width] = node
+//            }
+//
+//            if (prevNode != null && prevNode.depth >= node.depth) {
+//                makeChildDown(node, prevNode.depth - node.depth + 1)
+//            }
+//
+//            for (i in node.choice.indices) {
+//                node.choice[i]?.let {
+//                    if (edgeArr[node.id][i] == null) {
+//                        edgeArr[node.id][i] = EdgeData(node, it.DestinationNode)
+//                        recursion(node, it.DestinationNode)
+//                    }
+//                }
+//            }
+//        }
+//
+//        recursion(null, rootNode)
+//        PositionArrToList()
+//        EdgeArrToList()
+//
+//        isChanged = !isChanged
+//    }
 
     suspend fun PositionArrToList(){
         nodePositionList.clear()

@@ -47,6 +47,11 @@ import com.hackathon.team15_android.presentation.ui.main.MainViewModel
 import kotlinx.coroutines.coroutineScope
 import okhttp3.internal.wait
 
+fun selectChoice(choice : List<ChoiceData>) : Int?{
+    if (choice.size <= 2 ) return choice.size+1
+    else return null
+}
+
 @Composable
 fun EditScreen(
     mainViewModel : MainViewModel,
@@ -75,10 +80,7 @@ fun EditScreen(
             )
         }
 
-        fun selectChoice(choice : List<ChoiceData>) : Int?{
-            if (choice.size <= 2 ) return choice.size+1
-            else return null
-        }
+
 //        BottomChoice(mainViewModel.choiceList)
         BottomChoice(
             choiceList,

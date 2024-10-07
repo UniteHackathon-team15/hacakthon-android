@@ -25,7 +25,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -39,7 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +56,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -79,13 +86,28 @@ fun PublicationScreen(
     val isChanged by rememberUpdatedState(newValue = mainViewModel.isChanged)
 
     val currentNode by rememberUpdatedState(newValue = mainViewModel.currentNode)
+    var showDialog by remember { mutableStateOf(false)}
 
-    DisposableEffect(Unit){
+        DisposableEffect(Unit){
         coroutineScope.launch(Dispatchers.Main) {
             mainViewModel.makePosition()
         }
         onDispose {  }
 
+    }
+
+    if (showDialog) {
+        // TextInput이 있는 모달
+        TextInputModal(
+            onConfirm = { choiceText, nodeNumber ->
+                val choice = selectChoice(mainViewModel.choiceListArr[mainViewModel.currentNode.id])
+                if (choice == null) Log.d(TAG,"선택지는 3개까지 만들 수 있습니다")
+                else {
+                    mainViewModel.addExistedNode(mainViewModel.currentNode,mainViewModel.findNodeById(nodeNumber),choice,choiceText)
+                }
+            },
+            onDismiss = { showDialog = false }
+        )
     }
 
     DraggableAndZoomableView(
@@ -105,11 +127,15 @@ fun PublicationScreen(
             navController.navigate(NavItem.Edit.route)
                       },
         onPlusClick = {
-            val isSuccess = mainViewModel.postStory(mainViewModel.combineData())
-            if(isSuccess) navController.popBackStack()
+//            val isSuccess = mainViewModel.postStory(mainViewModel.combineData())
+//            if(isSuccess) navController.popBackStack()
+//            mainViewModel.addExistedNode()
+            showDialog = true
         }
     )
 }
+
+
 
 @Preview
 @Composable
@@ -271,52 +297,184 @@ fun BottomPage(
 }
 
 @Composable
+fun TextInputModal(
+    onDismiss: () -> Unit,
+    onConfirm: (choiceText: String, nodeNumber: Int) -> Unit
+) {
+    var choiceText by remember { mutableStateOf("") }
+    var nodeNumber by remember { mutableStateOf("") } // 이어질 스토리 ID는 숫자지만 TextField는 문자열을 처리하므로 String으로 받음
+
+    Dialog(
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
+    ) {
+        Surface(shape = MaterialTheme.shapes.medium) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // 선택지 내용 입력
+                Text(
+                    text = "Enter choice text:",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                TextField(
+                    value = choiceText,
+                    onValueChange = { choiceText = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+
+                // 이어질 스토리 ID 입력
+                Text(
+                    text = "Enter story node ID:",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                TextField(
+                    value = nodeNumber,
+                    onValueChange = { nodeNumber = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+
+                // 확인 버튼
+                Button(
+                    onClick = {
+                        val nodeId = nodeNumber.toIntOrNull() ?: 0 // 숫자로 변환, 실패 시 기본값 0
+                        onConfirm(choiceText, nodeId)
+                        onDismiss()
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Confirm")
+                }
+            }
+        }
+    }
+}
+
+
+//@Composable
+//fun drawNodes(
+//    positionList : MutableList<NodePosition>,
+//    edgeList : MutableList<EdgeData>,
+//    onNodeClick : (node : TreeNode) -> Unit,
+//    context : Context
+//){
+//    for (i in edgeList){
+//        Canvas(
+//            modifier = Modifier
+//                .wrapContentSize()
+//        ) {
+//            drawLine(
+//                color = Color.Black, // 선의 색상을 설정합니다.
+//                start = Offset(
+//                    ConvertDPtoPX(context,i.prevNode.width * 100 + 20 + 100).toFloat(),
+//                    ConvertDPtoPX(context,i.prevNode.depth * 200 + 20 + 100).toFloat()),   // 시작 점을 설정합니다.
+//                end = Offset(
+//                    ConvertDPtoPX(context,i.node.width * 100 + 20 + 100).toFloat(),
+//                    ConvertDPtoPX(context,i.node.depth * 200 + 20 + 100).toFloat()),
+//                strokeWidth = 10F// 끝 점을 설정합니다.
+//            )
+//        }
+//    }
+//
+//    for (i in positionList){
+//
+//        Log.d(TAG, "${i.node.text} - ${i.x}, ${i.y}")
+//
+//        val node = i.node
+//
+//        Log.d(TAG,"${node.text} 생성!")
+//
+//        Box(
+//            modifier = Modifier
+//                .height(40.dp)
+//                .width(40.dp)
+//                .offset(
+//                    x = (i.x * 100 + 100).dp,
+//                    y = (i.y * 200 + 100).dp
+//                )
+//        ) {
+//
+//            Button(
+//                onClick = {
+//                    onNodeClick(node)
+//                },
+//                modifier = Modifier
+//                    .height(40.dp)
+//                    .width(40.dp)
+//                    .align(Alignment.Center),
+//                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+//            ) {
+//                Text(
+//                    text = "${node.id}",
+//                    color = Color(0xFFFFFFFF),
+//                    fontFamily = FontFamily(Font(R.font.pretendard_medium)),
+//                    fontWeight = FontWeight.Medium,
+//                    fontSize = 12.sp
+//                )
+//            }
+//
+//        }
+//    }
+//
+//}
+
+@Composable
 fun drawNodes(
     positionList : MutableList<NodePosition>,
     edgeList : MutableList<EdgeData>,
     onNodeClick : (node : TreeNode) -> Unit,
     context : Context
-){
-    for (i in edgeList){
-        Canvas(
-            modifier = Modifier
-                .wrapContentSize()
-        ) {
-            drawLine(
-                color = Color.Black, // 선의 색상을 설정합니다.
-                start = Offset(
-                    ConvertDPtoPX(context,i.prevNode.width * 100 + 20 + 100).toFloat(),
-                    ConvertDPtoPX(context,i.prevNode.depth * 200 + 20 + 100).toFloat()),   // 시작 점을 설정합니다.
-                end = Offset(
-                    ConvertDPtoPX(context,i.node.width * 100 + 20 + 100).toFloat(),
-                    ConvertDPtoPX(context,i.node.depth * 200 + 20 + 100).toFloat()),
-                strokeWidth = 10F// 끝 점을 설정합니다.
+) {
+    Canvas(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // 간선을 곡선으로 그리기
+        for (edge in edgeList) {
+            val start = Offset(
+                ConvertDPtoPX(context, edge.prevNode.width * 100 + 20 + 100).toFloat(),
+                ConvertDPtoPX(context, edge.prevNode.depth * 200 + 20 + 100).toFloat()
+            )
+            val end = Offset(
+                ConvertDPtoPX(context, edge.node.width * 100 + 20 + 100).toFloat(),
+                ConvertDPtoPX(context, edge.node.depth * 200 + 20 + 100).toFloat()
+            )
+
+            // 중간 점을 계산하여 곡선 그리기
+            val midX = (start.x + end.x) / 2 - 100
+            val midY = (start.y + end.y) / 2 - 200 // 곡선이 위로 올라가도록 조정
+
+            drawPath(
+                path = Path().apply {
+                    moveTo(start.x, start.y)
+                    quadraticBezierTo(midX, midY, end.x, end.y)
+                },
+                color = Color.Black,
+                style = Stroke(width = 10f)
             )
         }
     }
 
-    for (i in positionList){
-
-        Log.d(TAG, "${i.node.text} - ${i.x}, ${i.y}")
-
-        val node = i.node
-
-        Log.d(TAG,"${node.text} 생성!")
-
+    for (position in positionList) {
+        val node = position.node
         Box(
             modifier = Modifier
                 .height(40.dp)
                 .width(40.dp)
                 .offset(
-                    x = (i.x * 100 + 100).dp,
-                    y = (i.y * 200 + 100).dp
+                    x = (position.x * 100 + 100).dp,
+                    y = (position.y * 200 + 100).dp
                 )
         ) {
-
             Button(
-                onClick = {
-                    onNodeClick(node)
-                },
+                onClick = { onNodeClick(node) },
                 modifier = Modifier
                     .height(40.dp)
                     .width(40.dp)
@@ -331,11 +489,10 @@ fun drawNodes(
                     fontSize = 12.sp
                 )
             }
-
         }
     }
-
 }
+
 
 fun ConvertDPtoPX(context: Context, dp: Int): Int {
     val density = context.resources.displayMetrics.density
